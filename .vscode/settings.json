@@ -1,0 +1,16 @@
+{
+    "cSpell.words": [
+        "Iden"
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "localhost",
+            "database": "password_manager",
+            "username": "abdulqudduus"
+        }
+    ]
+}
