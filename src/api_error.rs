@@ -1,0 +1,117 @@
+use actix_web::{http::StatusCode, HttpResponse, ResponseError};
+use log::error;
+use migration::DbErr;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use std::fmt;
+
+#[derive(Debug, Deserialize)]
+pub struct ApiError {
+    pub status_code: u16,
+    pub message: String,
+}
+
+impl ApiError {
+    pub fn new(status_code: u16, message: String) -> ApiError {
+        ApiError {
+            status_code,
+            message,
+        }
+    }
+
+    pub fn unauthorized(message: String) -> ApiError {
+        ApiError::new(401, message)
+    }
+
+    pub fn internal_server_error() -> ApiError {
+        ApiError::new(500, "Internal server error".to_string())
+    }
+
+    pub fn bad_request(message: String) -> ApiError {
+        ApiError::new(400, message)
+    }
+
+    // pub fn bad_request_json<T: Serialize>(message: T) -> ApiError {
+    //     ApiError::new(400, message)
+    // }
+
+    pub fn not_found(message: String) -> ApiError {
+        ApiError::new(404, message)
+    }
+}
+
+impl fmt::Display for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.message.as_str())
+    }
+}
+
+impl From<DbErr> for ApiError {
+    fn from(error: DbErr) -> Self {
+        match error {
+            DbErr::ConnectionAcquire => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::TryIntoErr { from: _, into: _, source: _ } => {
+                ApiError::new(500, format!("Diesel error: "))
+            }
+            DbErr::Conn(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
+            DbErr::Exec(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
+            DbErr::Query(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
+            DbErr::ConvertFromU64(_) => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::UnpackInsertId => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::UpdateGetPrimaryKey => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::RecordNotFound(_) => ApiError::new(404, "Record not found".to_string()),
+            DbErr::AttrNotSet(_) => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::Custom(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
+            DbErr::Type(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
+            DbErr::Json(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
+            DbErr::Migration(_) => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::RecordNotInserted => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+            DbErr::RecordNotUpdated => {
+                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            }
+        }
+    }
+}
+
+// impl From<DieselError> for ApiError {
+//     fn from(error: DieselError) -> ApiError {
+//         match error {
+//             DieselError::DatabaseError(_, err) => ApiError::new(409, err.message().to_string()),
+//             DieselError::NotFound => ApiError::new(404, "Record not found".to_string()),
+//             err => ApiError::new(500, format!("Diesel error: {}", err)),
+//         }
+//     }
+// }
+
+impl ResponseError for ApiError {
+    fn error_response(&self) -> HttpResponse {
+        let status_code = match StatusCode::from_u16(self.status_code) {
+            Ok(status_code) => status_code,
+            Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+
+        let message = match status_code.as_u16() < 500 {
+            true => self.message.clone(),
+            false => {
+                error!("{}", self.message);
+                "Internal server error".to_string()
+            }
+        };
+
+        HttpResponse::build(status_code).json(json!({ "message": message }))
+    }
+}

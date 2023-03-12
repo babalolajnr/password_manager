@@ -1,26 +1,29 @@
-use sea_orm::{ConnectionTrait, Database, DbErr, Statement};
+use std::env;
 
-const DB_NAME: &str = "password_manager";
-// const DATABASE_URL: &str = "postgres://abdulqudduus:andromeda@localhost/password_manager";
-const DATABASE_URL: &str = "postgres://abdulqudduus:andromeda@localhost/password_manager";
+use log::info;
+use sea_orm::{ConnectionTrait, Database, DbErr, Statement, DatabaseConnection};
 
-pub async fn init() -> Result<(), DbErr> {
-    let db = Database::connect(DATABASE_URL).await?;
+pub async fn init() -> Result<DatabaseConnection, DbErr> {
+    info!("Connecting to database...");
+    
+    let database_url = env::var("DATABASE_URL").unwrap();
+    let db = Database::connect(&database_url).await?;
 
     // let db = db.get_database_backend();
-    db.execute(Statement::from_string(
-        db.get_database_backend(),
-        format!("DROP DATABASE IF EXISTS \"{}\";", DB_NAME),
-    )).await?;
+    // db.execute(Statement::from_string(
+    //     db.get_database_backend(),
+    //     format!("DROP DATABASE IF EXISTS \"{}\";", DB_NAME),
+    // )).await?;
 
-    db.execute(Statement::from_string(
-        db.get_database_backend(),
-        format!("CREATE DATABASE \"{}\";", DB_NAME),
-    )).await?;
+    // db.execute(Statement::from_string(
+    //     db.get_database_backend(),
+    //     format!("CREATE DATABASE \"{}\";", DB_NAME),
+    // )).await?;
 
-    let url = format!("{}/{}", DATABASE_URL, DB_NAME);
+    let url = format!("{}", database_url);
     
     Database::connect(&url).await?;
+    info!("Connected to database");
 
-    Ok(())
+    Ok(db)
 }
