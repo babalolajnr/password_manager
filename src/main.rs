@@ -5,7 +5,6 @@ use database::init::init;
 use dotenvy::dotenv;
 use listenfd::ListenFd;
 use log::{info, warn};
-use std::sync::Arc;
 use sea_orm::DatabaseConnection;
 
 use crate::routes::{auth, user};

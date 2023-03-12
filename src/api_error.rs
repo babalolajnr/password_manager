@@ -8,26 +8,32 @@ use std::fmt;
 #[derive(Debug, Deserialize)]
 pub struct ApiError {
     pub status_code: u16,
-    pub message: String,
+    pub message: ErrorMessage,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum ErrorMessage {
+    Text(String),
+    Json(serde_json::Value),
 }
 
 impl ApiError {
-    pub fn new(status_code: u16, message: String) -> ApiError {
+    pub fn new(status_code: u16, message: ErrorMessage) -> ApiError {
         ApiError {
             status_code,
             message,
         }
     }
 
-    pub fn unauthorized(message: String) -> ApiError {
+    pub fn unauthorized(message: ErrorMessage) -> ApiError {
         ApiError::new(401, message)
     }
 
     pub fn internal_server_error() -> ApiError {
-        ApiError::new(500, "Internal server error".to_string())
+        ApiError::new(500, ErrorMessage::Text("Internal server error".to_string()))
     }
 
-    pub fn bad_request(message: String) -> ApiError {
+    pub fn bad_request(message: ErrorMessage) -> ApiError {
         ApiError::new(400, message)
     }
 
@@ -35,54 +41,87 @@ impl ApiError {
     //     ApiError::new(400, message)
     // }
 
-    pub fn not_found(message: String) -> ApiError {
+    pub fn not_found(message: ErrorMessage) -> ApiError {
         ApiError::new(404, message)
     }
 }
 
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.message.as_str())
+        match &self.message {
+            ErrorMessage::Text(message) => f.write_str(message.as_str()),
+            ErrorMessage::Json(message) => f.write_str(&message.to_string()),
+        }
     }
 }
 
 impl From<DbErr> for ApiError {
     fn from(error: DbErr) -> Self {
         match error {
-            DbErr::ConnectionAcquire => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
+            DbErr::ConnectionAcquire => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::TryIntoErr {
+                from: _,
+                into: _,
+                source: _,
+            } => ApiError::new(500, ErrorMessage::Text(format!("Diesel error: "))),
+            DbErr::Conn(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::Exec(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::Query(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::ConvertFromU64(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::UnpackInsertId => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::UpdateGetPrimaryKey => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::RecordNotFound(_) => {
+                ApiError::new(404, ErrorMessage::Text("Record not found".to_string()))
             }
-            DbErr::TryIntoErr { from: _, into: _, source: _ } => {
-                ApiError::new(500, format!("Diesel error: "))
-            }
-            DbErr::Conn(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
-            DbErr::Exec(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
-            DbErr::Query(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
-            DbErr::ConvertFromU64(_) => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
-            DbErr::UnpackInsertId => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
-            DbErr::UpdateGetPrimaryKey => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
-            DbErr::RecordNotFound(_) => ApiError::new(404, "Record not found".to_string()),
-            DbErr::AttrNotSet(_) => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
-            DbErr::Custom(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
-            DbErr::Type(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
-            DbErr::Json(_) => ApiError::new(500, format!("Diesel error: {}", error.to_string())),
-            DbErr::Migration(_) => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
-            DbErr::RecordNotInserted => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
-            DbErr::RecordNotUpdated => {
-                ApiError::new(500, format!("Diesel error: {}", error.to_string()))
-            }
+            DbErr::AttrNotSet(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::Custom(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::Type(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::Json(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::Migration(_) => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::RecordNotInserted => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
+            DbErr::RecordNotUpdated => ApiError::new(
+                500,
+                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+            ),
         }
     }
 }
@@ -107,8 +146,8 @@ impl ResponseError for ApiError {
         let message = match status_code.as_u16() < 500 {
             true => self.message.clone(),
             false => {
-                error!("{}", self.message);
-                "Internal server error".to_string()
+                error!("{:?}", self.message);
+                ErrorMessage::Text("Internal Server Error".to_string())
             }
         };
 

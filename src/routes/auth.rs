@@ -7,7 +7,7 @@ use sea_orm::DbConn;
 use serde_json::json;
 use validator::Validate;
 
-use crate::{api_error::ApiError, dto::create_user::CreateUserDTO, entities::user::Model, AppState};
+use crate::{api_error::{ApiError, ErrorMessage}, dto::create_user::CreateUserDTO, entities::user::Model, AppState};
 
 #[post("/register")]
 async fn register(dto: Json<CreateUserDTO>, data: Data<AppState>) -> Result<HttpResponse, ApiError> {
@@ -16,7 +16,7 @@ async fn register(dto: Json<CreateUserDTO>, data: Data<AppState>) -> Result<Http
     match dto.validate() {
         Ok(_) => (),
         Err(e) => {
-            return Err(ApiError::bad_request(e.to_string()));
+            return Err(ApiError::bad_request(ErrorMessage::Json(json!({"message": e}))));
         }
     }
 
