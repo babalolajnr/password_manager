@@ -12,18 +12,18 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .add_column_if_not_exists(
                         ColumnDef::new(User::CreatedAt)
-                            .timestamp_with_time_zone()
+                            .timestamp()
                             .not_null(),
                     )
                     .add_column_if_not_exists(
                         ColumnDef::new(User::UpdatedAt)
-                            .timestamp_with_time_zone()
+                            .timestamp()
                             .not_null(),
                     )
                     .add_column_if_not_exists(
                         ColumnDef::new(User::DeletedAt)
-                            .timestamp_with_time_zone()
-                            .not_null(),
+                            .timestamp()
+                            .null(),
                     )
                     .to_owned(),
             )
