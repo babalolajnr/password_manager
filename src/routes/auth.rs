@@ -3,7 +3,7 @@ use actix_web::{
     web::{self, Json, Data},
     HttpResponse,
 };
-use sea_orm::DbConn;
+
 use serde_json::json;
 use validator::Validate;
 
@@ -20,10 +20,9 @@ async fn register(dto: Json<CreateUserDTO>, data: Data<AppState>) -> Result<Http
         }
     }
 
-    let result = Model::create(dto.into_inner(), conn).await?;
+    let result = Model::create(dto.into_inner(), conn).await?.unwrap();
 
-    // Ok(HttpResponse::Ok().json(result))
-    Ok(HttpResponse::Ok().json(json!({"status": "created"})))
+    Ok(HttpResponse::Created().json(json!({"data": result})))
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {

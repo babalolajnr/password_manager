@@ -1,4 +1,4 @@
-use sea_orm::{ActiveValue, DbConn, EntityTrait, InsertResult};
+use sea_orm::{ActiveValue, DbConn, EntityTrait};
 
 use crate::{
     api_error::ApiError,
@@ -10,7 +10,7 @@ impl Model {
     pub async fn create(
         user: CreateUserDTO,
         db: &DbConn,
-    ) -> Result<InsertResult<user::ActiveModel>, ApiError> {
+    ) -> Result<Option<Model>, ApiError> {
         let data = Model::from(user);
 
         let new_user = user::ActiveModel {
@@ -25,6 +25,8 @@ impl Model {
 
         let new_user = user::Entity::insert(new_user).exec(db).await?;
 
-        Ok(new_user)
+        let new_user = user::Entity::find_by_id(new_user.last_insert_id).all(db).await?;
+
+        Ok(new_user.first().cloned())
     }
 }

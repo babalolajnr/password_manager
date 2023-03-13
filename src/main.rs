@@ -29,8 +29,6 @@ async fn main() -> std::io::Result<()> {
     // Connect to database
     let conn = init().await.unwrap();
 
-    // let conn = block_on(init()).unwrap();
-
     let mut listenfd = ListenFd::from_env();
     let state = AppState { conn };
 
