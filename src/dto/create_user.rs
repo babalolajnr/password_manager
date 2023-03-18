@@ -48,14 +48,3 @@ impl From<CreateUserDTO> for Model {
         }
     }
 }
-
-// impl FromRequest for CreateUserDTO {
-//     type Error = ApiError;
-
-//     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-
-//     fn from_request(req: &actix_web::HttpRequest, payload: &mut actix_web::dev::Payload) -> Self::Future {
-//         todo!()
-//     }
-
-// }
