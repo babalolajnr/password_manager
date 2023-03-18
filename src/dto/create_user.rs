@@ -1,10 +1,11 @@
 use chrono::Utc;
 
+use sea_orm::DbConn;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::{entities::user::Model};
+use crate::{entities::users::Model, validators::unique::unique};
 
 #[derive(Serialize, Deserialize, Validate)]
 pub struct CreateUserDTO {
@@ -17,7 +18,8 @@ pub struct CreateUserDTO {
         length(
             min = 3,
             message = "Email is too short. It must be at least 3 characters long"
-        )
+        ),
+        custom(function = "unique", arg = "(&'v_a str, &'v_a str, &'v_a DbConn)")
     )]
     pub email: Option<String>,
 
@@ -55,6 +57,5 @@ impl From<CreateUserDTO> for Model {
 //     fn from_request(req: &actix_web::HttpRequest, payload: &mut actix_web::dev::Payload) -> Self::Future {
 //         todo!()
 //     }
-
 
 // }

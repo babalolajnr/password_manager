@@ -3,7 +3,7 @@ use sea_orm::{ActiveValue, DbConn, EntityTrait};
 use crate::{
     api_error::ApiError,
     dto::create_user::CreateUserDTO,
-    entities::user::{self, Model},
+    entities::users::{self, Model},
 };
 
 impl Model {
@@ -13,7 +13,7 @@ impl Model {
     ) -> Result<Option<Model>, ApiError> {
         let data = Model::from(user);
 
-        let new_user = user::ActiveModel {
+        let new_user = users::ActiveModel {
             id: ActiveValue::set(data.id),
             name: ActiveValue::set(data.name),
             email: ActiveValue::set(data.email),
@@ -23,9 +23,9 @@ impl Model {
             deleted_at: ActiveValue::set(data.deleted_at),
         };
 
-        let new_user = user::Entity::insert(new_user).exec(db).await?;
+        let new_user = users::Entity::insert(new_user).exec(db).await?;
 
-        let new_user = user::Entity::find_by_id(new_user.last_insert_id).all(db).await?;
+        let new_user = users::Entity::find_by_id(new_user.last_insert_id).all(db).await?;
 
         Ok(new_user.first().cloned())
     }

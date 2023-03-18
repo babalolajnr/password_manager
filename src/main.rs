@@ -15,6 +15,7 @@ mod dto;
 mod entities;
 mod routes;
 mod services;
+mod validators;
 
 #[derive(Debug, Clone)]
 struct AppState {
