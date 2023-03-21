@@ -29,3 +29,4 @@ bcrypt = "0.14.0"
 jwt = "0.16.0"
 hmac = "0.12.1"
 chrono = {version = "0.4.23", features = ["serde"]}
+sha2 = "0.10.6"

@@ -1,16 +1,16 @@
-use sea_orm::{ActiveValue, DbConn, EntityTrait};
+use bcrypt::BcryptError;
+use sea_orm::{
+    ActiveValue, ColumnTrait, DbConn, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+};
 
 use crate::{
     api_error::ApiError,
     dto::create_user::CreateUserDTO,
-    entities::users::{self, Model},
+    entities::users::{self, Column, Entity as User, Model},
 };
 
 impl Model {
-    pub async fn create(
-        user: CreateUserDTO,
-        db: &DbConn,
-    ) -> Result<Option<Model>, ApiError> {
+    pub async fn create(user: CreateUserDTO, db: &DbConn) -> Result<Option<Model>, ApiError> {
         let data = Model::from(user);
 
         let new_user = users::ActiveModel {
@@ -25,8 +25,25 @@ impl Model {
 
         let new_user = users::Entity::insert(new_user).exec(db).await?;
 
-        let new_user = users::Entity::find_by_id(new_user.last_insert_id).all(db).await?;
+        let new_user = users::Entity::find_by_id(new_user.last_insert_id)
+            .all(db)
+            .await?;
 
         Ok(new_user.first().cloned())
+    }
+
+    pub async fn find_by_email(email: &str, db: &DbConn) -> Result<Option<Model>, ApiError> {
+        let result: Vec<Model> = User::find()
+            .filter(Column::Email.contains(email))
+            .order_by_asc(Column::CreatedAt)
+            .limit(1)
+            .all(db)
+            .await?;
+
+        Ok(result.first().cloned())
+    }
+
+    pub fn verify_password(&self, password: &str) -> Result<bool, BcryptError> {
+        Ok(bcrypt::verify(password, &self.password)?)
     }
 }

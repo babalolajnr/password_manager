@@ -1,16 +1,20 @@
+use std::collections::BTreeMap;
+
 use actix_web::{
     post,
     web::{self, Data, Json},
     HttpResponse,
 };
 
+use serde::{Deserialize, Serialize};
 use serde_json::json;
-use validator::ValidateArgs;
+use validator::{Validate, ValidateArgs};
 
 use crate::{
     api_error::{ApiError, ErrorMessage},
-    dto::create_user::CreateUserDTO,
-    entities::users::Model,
+    dto::{create_user::CreateUserDTO, login::LoginDTO},
+    entities::users::Model as User,
+    services::auth::sign,
     AppState,
 };
 
@@ -30,11 +34,59 @@ async fn register(
         }
     }
 
-    let result = Model::create(dto.into_inner(), conn).await?.unwrap();
+    let result = User::create(dto.into_inner(), conn).await?.unwrap();
 
     Ok(HttpResponse::Created().json(json!({ "data": result })))
 }
 
+#[post("/login")]
+async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse, ApiError> {
+    let conn = &data.conn;
+
+    match dto.validate() {
+        Ok(_) => (),
+        Err(e) => {
+            return Err(ApiError::bad_request(ErrorMessage::Json(json!({
+                "message": e
+            }))));
+        }
+    }
+
+    let email = dto.email.as_ref().unwrap();
+
+    let user = User::find_by_email(email, conn).await?.unwrap();
+
+    if !user
+        .verify_password(dto.password.as_ref().unwrap())
+        .unwrap()
+    {
+        return Err(ApiError::unauthorized(ErrorMessage::Text(
+            "Invalid credentials".to_string(),
+        )));
+    }
+
+    let user_id = user.id.to_string();
+    let name = user.name.to_string();
+    let email = user.email.to_string();
+
+    let mut claims = BTreeMap::new();
+    claims.insert("id", user_id.as_str());
+    claims.insert("name", name.as_str());
+    claims.insert("email", email.as_str());
+
+    let token = sign(claims).map_err(|_| ApiError::internal_server_error());
+
+    Ok(HttpResponse::Ok().json(LoginResponse {
+        token: token.unwrap(),
+    }))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LoginResponse {
+    pub token: String,
+}
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
+    cfg.service(login);
 }
