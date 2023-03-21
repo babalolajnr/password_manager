@@ -54,31 +54,37 @@ async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse
 
     let email = dto.email.as_ref().unwrap();
 
-    let user = User::find_by_email(email, conn).await?.unwrap();
+    let result = User::find_by_email(email, conn).await?;
 
-    if !user
-        .verify_password(dto.password.as_ref().unwrap())
-        .unwrap()
-    {
+    if let Some(user) = result {
+        if !user
+            .verify_password(dto.password.as_ref().unwrap())
+            .unwrap()
+        {
+            return Err(ApiError::unauthorized(ErrorMessage::Text(
+                "Invalid credentials".to_string(),
+            )));
+        }
+
+        let user_id = user.id.to_string();
+        let name = user.name.to_string();
+        let email = user.email.to_string();
+
+        let mut claims = BTreeMap::new();
+        claims.insert("id", user_id.as_str());
+        claims.insert("name", name.as_str());
+        claims.insert("email", email.as_str());
+
+        let token = sign(claims).map_err(|_| ApiError::internal_server_error());
+
+        Ok(HttpResponse::Ok().json(LoginResponse {
+            token: token.unwrap(),
+        }))
+    } else {
         return Err(ApiError::unauthorized(ErrorMessage::Text(
             "Invalid credentials".to_string(),
         )));
     }
-
-    let user_id = user.id.to_string();
-    let name = user.name.to_string();
-    let email = user.email.to_string();
-
-    let mut claims = BTreeMap::new();
-    claims.insert("id", user_id.as_str());
-    claims.insert("name", name.as_str());
-    claims.insert("email", email.as_str());
-
-    let token = sign(claims).map_err(|_| ApiError::internal_server_error());
-
-    Ok(HttpResponse::Ok().json(LoginResponse {
-        token: token.unwrap(),
-    }))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
