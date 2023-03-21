@@ -81,9 +81,9 @@ async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse
             token: token.unwrap(),
         }))
     } else {
-        return Err(ApiError::unauthorized(ErrorMessage::Text(
+        Err(ApiError::unauthorized(ErrorMessage::Text(
             "Invalid credentials".to_string(),
-        )));
+        )))
     }
 }
 
