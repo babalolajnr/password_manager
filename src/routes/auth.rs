@@ -12,7 +12,7 @@ use validator::{Validate, ValidateArgs};
 
 use crate::{
     api_error::{ApiError, ErrorMessage},
-    dto::{create_user::CreateUserDTO, login::LoginDTO},
+    dto::auth::{create_user::CreateUserDTO, login::LoginDTO},
     entities::users::Model as User,
     services::auth::sign,
     AppState,

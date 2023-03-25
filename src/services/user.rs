@@ -5,7 +5,7 @@ use sea_orm::{
 
 use crate::{
     api_error::ApiError,
-    dto::create_user::CreateUserDTO,
+    dto::auth::create_user::CreateUserDTO,
     entities::users::{self, Column, Entity as User, Model},
 };
 

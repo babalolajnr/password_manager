@@ -1,13 +1,17 @@
 use std::env;
 
-use actix_web::{middleware, web::{self, Data}, App, HttpServer};
+use actix_web::{
+    middleware,
+    web::{self, Data},
+    App, HttpServer,
+};
 use database::init::init;
 use dotenvy::dotenv;
 use listenfd::ListenFd;
-use log::{info, warn};
+use log::info;
 use sea_orm::DatabaseConnection;
 
-use crate::routes::{auth, user};
+use crate::routes::{auth, password};
 
 mod api_error;
 mod database;
@@ -38,7 +42,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(state.clone()))
             .wrap(middleware::Logger::default())
             .service(web::scope("/auth").configure(auth::init_routes))
-            .service(web::scope("/user").configure(user::init_routes))
+            .service(web::scope("/password").configure(password::init_routes))
             .service(echo)
     });
 
