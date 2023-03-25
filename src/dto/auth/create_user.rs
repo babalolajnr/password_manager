@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::{entities::users::Model, validators::unique::unique};
+use crate::{entities::users::Model as User, validators::unique::unique};
 
 #[derive(Serialize, Deserialize, Validate)]
 pub struct CreateUserDTO {
@@ -33,11 +33,11 @@ pub struct CreateUserDTO {
     pub password: Option<String>,
 }
 
-impl From<CreateUserDTO> for Model {
+impl From<CreateUserDTO> for User {
     fn from(user: CreateUserDTO) -> Self {
         let timestamp = Utc::now().naive_utc();
 
-        Model {
+        User {
             id: Uuid::new_v4(),
             name: user.name.unwrap(),
             email: user.email.unwrap(),
