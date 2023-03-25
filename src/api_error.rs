@@ -25,8 +25,11 @@ impl ApiError {
         }
     }
 
-    pub fn unauthorized(message: ErrorMessage) -> ApiError {
-        ApiError::new(401, message)
+    pub fn unauthorized() -> ApiError {
+        ApiError::new(
+            401,
+            ErrorMessage::Json(json!("This request is unauthorized".to_string())),
+        )
     }
 
     pub fn internal_server_error() -> ApiError {

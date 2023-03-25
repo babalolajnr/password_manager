@@ -20,12 +20,15 @@ mod entities;
 mod routes;
 mod services;
 mod validators;
+pub mod middlewares;
 
 #[derive(Debug, Clone)]
 struct AppState {
     conn: DatabaseConnection,
 }
 
+// Start server and file watcher with
+// systemfd --no-pid -s http::5000 -- cargo watch -x run
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();

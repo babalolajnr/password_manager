@@ -2,6 +2,7 @@ use bcrypt::BcryptError;
 use sea_orm::{
     ActiveValue, ColumnTrait, DbConn, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
 };
+use uuid::Uuid;
 
 use crate::{
     api_error::ApiError,
@@ -41,6 +42,11 @@ impl Model {
             .await?;
 
         Ok(result.first().cloned())
+    }
+
+    pub async fn find(id: &Uuid, db: &DbConn) -> Result<Option<Model>, ApiError> {
+        let result: Option<Model> = User::find_by_id(id.to_owned()).one(db).await?;
+        Ok(result)
     }
 
     pub fn verify_password(&self, password: &str) -> Result<bool, BcryptError> {

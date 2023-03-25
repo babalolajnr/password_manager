@@ -61,9 +61,7 @@ async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse
             .verify_password(dto.password.as_ref().unwrap())
             .unwrap()
         {
-            return Err(ApiError::unauthorized(ErrorMessage::Text(
-                "Invalid credentials".to_string(),
-            )));
+            return Err(ApiError::unauthorized());
         }
 
         let user_id = user.id.to_string();
@@ -81,9 +79,7 @@ async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse
             token: token.unwrap(),
         }))
     } else {
-        Err(ApiError::unauthorized(ErrorMessage::Text(
-            "Invalid credentials".to_string(),
-        )))
+        Err(ApiError::unauthorized())
     }
 }
 
