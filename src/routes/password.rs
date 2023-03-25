@@ -7,7 +7,7 @@ use serde_json::json;
 use validator::Validate;
 
 use crate::{
-    api_error::{ApiError, ErrorMessage},
+    api_error::ApiError,
     dto::password::create_password::CreatePasswordDTO,
     entities::{passwords::Model as Password, users::Model as User},
     AppState,
@@ -24,9 +24,7 @@ async fn create_password(
     match dto.validate() {
         Ok(_) => (),
         Err(e) => {
-            return Err(ApiError::bad_request(ErrorMessage::Json(json!({
-                "message": e
-            }))));
+            return Err(ApiError::bad_request(json!({ "message": e })));
         }
     }
 

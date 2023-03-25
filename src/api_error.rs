@@ -1,24 +1,18 @@
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use log::error;
 use migration::DbErr;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 use std::fmt;
 
 #[derive(Debug, Deserialize)]
 pub struct ApiError {
     pub status_code: u16,
-    pub message: ErrorMessage,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum ErrorMessage {
-    Text(String),
-    Json(serde_json::Value),
+    pub message: serde_json::Value,
 }
 
 impl ApiError {
-    pub fn new(status_code: u16, message: ErrorMessage) -> ApiError {
+    pub fn new(status_code: u16, message: serde_json::Value) -> ApiError {
         ApiError {
             status_code,
             message,
@@ -26,17 +20,17 @@ impl ApiError {
     }
 
     pub fn unauthorized() -> ApiError {
-        ApiError::new(
-            401,
-            ErrorMessage::Json(json!("This request is unauthorized".to_string())),
-        )
+        ApiError::new(401, json!("This request is unauthorized".to_string()))
     }
 
     pub fn internal_server_error() -> ApiError {
-        ApiError::new(500, ErrorMessage::Text("Internal server error".to_string()))
+        ApiError::new(
+            500,
+            serde_json::Value::String("Internal server error".to_string()),
+        )
     }
 
-    pub fn bad_request(message: ErrorMessage) -> ApiError {
+    pub fn bad_request(message: serde_json::Value) -> ApiError {
         ApiError::new(400, message)
     }
 
@@ -44,17 +38,14 @@ impl ApiError {
     //     ApiError::new(400, message)
     // }
 
-    pub fn not_found(message: ErrorMessage) -> ApiError {
+    pub fn not_found(message: serde_json::Value) -> ApiError {
         ApiError::new(404, message)
     }
 }
 
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.message {
-            ErrorMessage::Text(message) => f.write_str(message.as_str()),
-            ErrorMessage::Json(message) => f.write_str(&message.to_string()),
-        }
+        f.write_str(&self.message.to_string())
     }
 }
 
@@ -63,81 +54,72 @@ impl From<DbErr> for ApiError {
         match error {
             DbErr::ConnectionAcquire => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::TryIntoErr {
                 from: _,
                 into: _,
                 source: _,
-            } => ApiError::new(500, ErrorMessage::Text(format!("Diesel error: "))),
+            } => ApiError::new(500, serde_json::Value::String(format!("Diesel error: "))),
             DbErr::Conn(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::Exec(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::Query(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::ConvertFromU64(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::UnpackInsertId => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::UpdateGetPrimaryKey => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
-            DbErr::RecordNotFound(_) => {
-                ApiError::new(404, ErrorMessage::Text("Record not found".to_string()))
-            }
+            DbErr::RecordNotFound(_) => ApiError::new(
+                404,
+                serde_json::Value::String("Record not found".to_string()),
+            ),
             DbErr::AttrNotSet(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::Custom(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::Type(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::Json(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::Migration(_) => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::RecordNotInserted => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
             DbErr::RecordNotUpdated => ApiError::new(
                 500,
-                ErrorMessage::Text(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
             ),
         }
     }
 }
-
-// impl From<DieselError> for ApiError {
-//     fn from(error: DieselError) -> ApiError {
-//         match error {
-//             DieselError::DatabaseError(_, err) => ApiError::new(409, err.message().to_string()),
-//             DieselError::NotFound => ApiError::new(404, "Record not found".to_string()),
-//             err => ApiError::new(500, format!("Diesel error: {}", err)),
-//         }
-//     }
-// }
 
 impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {
@@ -150,10 +132,10 @@ impl ResponseError for ApiError {
             true => self.message.clone(),
             false => {
                 error!("{:?}", self.message);
-                ErrorMessage::Text("Internal Server Error".to_string())
+                serde_json::Value::String("Internal Server Error".to_string())
             }
         };
 
-        HttpResponse::build(status_code).json(json!({ "message": message }))
+        HttpResponse::build(status_code).json(json!(message))
     }
 }

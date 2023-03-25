@@ -9,10 +9,7 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
-    api_error::{ApiError, ErrorMessage},
-    entities::users::Model as User,
-    services::auth::verify,
-    AppState,
+    api_error::ApiError, entities::users::Model as User, services::auth::verify, AppState,
 };
 
 // impl FromRequest for User {
@@ -111,9 +108,7 @@ impl FromRequest for User {
                             async move {
                                 User::find(&uuid, &app_state.conn).await?.ok_or_else(|| {
                                     error!("User not found");
-                                    ApiError::not_found(ErrorMessage::Json(json!(
-                                        "User not found".to_string()
-                                    )))
+                                    ApiError::not_found(json!("User not found".to_string()))
                                 })
                             }
                             .boxed_local(),

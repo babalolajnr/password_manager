@@ -11,7 +11,7 @@ use serde_json::json;
 use validator::{Validate, ValidateArgs};
 
 use crate::{
-    api_error::{ApiError, ErrorMessage},
+    api_error::ApiError,
     dto::auth::{create_user::CreateUserDTO, login::LoginDTO},
     entities::users::Model as User,
     services::auth::sign,
@@ -28,9 +28,7 @@ async fn register(
     match dto.validate_args(("email", "users", conn)) {
         Ok(_) => (),
         Err(e) => {
-            return Err(ApiError::bad_request(ErrorMessage::Json(json!({
-                "message": e
-            }))));
+            return Err(ApiError::bad_request(json!({ "message": e })));
         }
     }
 
@@ -46,9 +44,7 @@ async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse
     match dto.validate() {
         Ok(_) => (),
         Err(e) => {
-            return Err(ApiError::bad_request(ErrorMessage::Json(json!({
-                "message": e
-            }))));
+            return Err(ApiError::bad_request(json!({ "message": e })));
         }
     }
 
