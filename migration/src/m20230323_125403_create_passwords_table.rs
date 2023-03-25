@@ -23,10 +23,10 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Password::Password).string().not_null())
                     .col(ColumnDef::new(Password::Note).text())
                     .col(ColumnDef::new(Password::Tags).string())
-                    .col(ColumnDef::new(Password::Url).string())
+                    .col(ColumnDef::new(Password::Url).string().not_null())
                     .col(ColumnDef::new(Password::SecurityQuestion).text())
-                    .col(ColumnDef::new(Password::CreatedAt).timestamp())
-                    .col(ColumnDef::new(Password::UpdatedAt).timestamp())
+                    .col(ColumnDef::new(Password::CreatedAt).timestamp().not_null())
+                    .col(ColumnDef::new(Password::UpdatedAt).timestamp().not_null())
                     .col(ColumnDef::new(Password::DeletedAt).timestamp())
                     .col(ColumnDef::new(Password::ExpiredAt).timestamp())
                     .to_owned(),
