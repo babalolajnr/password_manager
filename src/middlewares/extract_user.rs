@@ -1,6 +1,5 @@
 use actix_web::{web::Data, FromRequest};
 use futures::{
-    executor::block_on,
     future::{ready, Either, LocalBoxFuture, Ready},
     FutureExt,
 };
@@ -11,67 +10,6 @@ use uuid::Uuid;
 use crate::{
     api_error::ApiError, entities::users::Model as User, services::auth::verify, AppState,
 };
-
-// impl FromRequest for User {
-//     type Error = ApiError;
-
-//     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-
-//     fn from_request(
-//         req: &actix_web::HttpRequest,
-//         _payload: &mut actix_web::dev::Payload,
-//     ) -> Self::Future {
-//         let authorization = req.headers().get("Authorization");
-
-//         let token = match authorization {
-//             Some(token) => token.to_str().map_err(|_| {
-//                 error!("Token is not a valid string");
-//                 ApiError::unauthorized(ErrorMessage::Json(json!(
-//                     "This request is unauthorized".to_string()
-//                 )))
-//             }),
-//             None => {
-//                 return Box::pin(async {
-//                     error!("No token provided");
-//                     Err(ApiError::unauthorized(ErrorMessage::Json(json!(
-//                         "This request is unauthorized".to_string()
-//                     ))))
-//                 })
-//             }
-//         };
-
-//         let verify = verify(token.unwrap());
-
-//         let claims = match verify {
-//             Ok(claims) => claims,
-//             Err(e) => {
-//                 error!("{:?}", e);
-//                 return Box::pin(async {
-//                     Err(ApiError::unauthorized(ErrorMessage::Json(json!(
-//                         "This request is unauthorized".to_string()
-//                     ))))
-//                 });
-//             }
-//         };
-
-//         let app_state = req.app_data::<Data<AppState>>();
-
-//         let uuid = Uuid::parse_str(&claims.get("id").unwrap())
-//             .map_err(|e| {
-//                 error!("{}", e);
-//                 ApiError::unauthorized(ErrorMessage::Json(json!(
-//                     "This request is unauthorized".to_string()
-//                 )))
-//             })
-//             .unwrap();
-
-//         let user = User::find(&uuid, &app_state.unwrap().conn);
-
-//         let user = block_on(user);
-
-//         Box::pin(async { Ok(user?.unwrap()) })
-//     }
-// }
 
 impl FromRequest for User {
     type Error = ApiError;
