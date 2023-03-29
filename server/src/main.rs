@@ -1,5 +1,6 @@
 use std::env;
 
+use actix_cors::Cors;
 use actix_web::{
     middleware,
     web::{self, Data},
@@ -17,10 +18,10 @@ mod api_error;
 mod database;
 mod dto;
 mod entities;
+pub mod middlewares;
 mod routes;
 mod services;
 mod validators;
-pub mod middlewares;
 
 #[derive(Debug, Clone)]
 struct AppState {
@@ -43,6 +44,14 @@ async fn main() -> std::io::Result<()> {
     let mut server = HttpServer::new(move || {
         App::new()
             .app_data(Data::new(state.clone()))
+            .wrap(
+                Cors::default()
+                    .allow_any_origin()
+                    .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+                    .allow_any_header()
+                    .supports_credentials()
+                    .max_age(3600),
+            )
             .wrap(middleware::Logger::default())
             .service(web::scope("/auth").configure(auth::init_routes))
             .service(web::scope("/password").configure(password::init_routes))
