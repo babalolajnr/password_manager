@@ -1,59 +1,35 @@
 <script lang="ts">
+	import NavBar from './components/NavBar.svelte';
+	import SearchIcon from './components/SearchIcon.svelte';
+	import SideBar from './components/SideBar.svelte';
 </script>
 
-<div class="flex flex-col mt-3 mx-12">
+<div class="flex flex-col mt-3 mx-12 nunito">
 	<header class="flex justify-between">
 		<div>PassMan</div>
-		<nav>
-			<ul class="flex gap-3 items-center font-medium">
-				<li
-					class="px-6 py-2 rounded-lg hover:bg-slate-600 hover:bg-opacity-10 cursor-pointer transition-all duration-150"
-				>
-					All
-				</li>
-				<li
-					class="px-6 py-2 rounded-lg hover:bg-slate-600 hover:bg-opacity-10 cursor-pointer transition-all duration-150"
-				>
-					Recently Imported
-				</li>
-				<li
-					class="px-6 py-2 rounded-lg hover:bg-slate-600 hover:bg-opacity-10 cursor-pointer transition-all duration-150"
-				>
-					Favorites
-				</li>
-			</ul>
-		</nav>
+		<NavBar />
 		<div class="flex gap-3">
 			<div>Image</div>
 			<div>Email</div>
 		</div>
 	</header>
 	<div class="border rounded-2xl flex mt-5">
-		<aside class="px-4 min-h-screen mx-6 basis-1/5 border-r">
-			<div class="flex flex-col gap-5 mt-6">
-				<div class="flex flex-col gap-3">
-					<h3 class="font-medium text-black text-opacity-50">CATEGORIES</h3>
-					<ul class="flex flex-col gap-2 ml-3">
-						<li>Logins</li>
-						<li>Identities</li>
-						<li>Movie Apps</li>
-						<li>Social Media</li>
-						<li>News</li>
-					</ul>
+		<SideBar />
+		<div class="grow flex justify-center">
+			<div class="mt-6 w-2/3 flex flex-col gap-10">
+				<div class="flex justify-between">
+					<div
+						class="flex items-center border border-black border-opacity-20 rounded-lg w-1/2 px-2 py-2"
+					>
+						<SearchIcon />
+						<input type="text" placeholder="Search" class="w-full outline-none" />
+					</div>
+					<button class="px-4 rounded-lg shadow-inner bg-purple-700 text-white">+ Add New</button>
 				</div>
-				<div class="flex flex-col gap-3">
-					<h3 class="font-medium text-black text-opacity-50">TAGS</h3>
-					<ul class="flex flex-col gap-2 ml-3">
-						<li>Starter Kit</li>
-						<li>School</li>
-						<li>Business</li>
-						<li>Design Tool</li>
-					</ul>
+				<div>
+					<slot />
 				</div>
 			</div>
-		</aside>
-		<div>
-			<slot />
 		</div>
 	</div>
 </div>
