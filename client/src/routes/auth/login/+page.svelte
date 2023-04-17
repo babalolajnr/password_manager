@@ -2,6 +2,7 @@
 	import backgroundImage from '../../../lib/images/login.jpg';
 	import { baseUrl } from '../../../config';
 	import { fade, slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 
 	let form = {
 		email: '',
@@ -28,10 +29,10 @@
 			body: JSON.stringify(form)
 		});
 
-		console.log(response);
 
 		if (response.ok) {
-			alert('Welcome');
+			// Navigate to dashboard
+            goto('/dashboard')
 		} else {
 			error = true;
 			setTimeout(() => {
