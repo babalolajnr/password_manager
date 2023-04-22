@@ -25,6 +25,7 @@ impl Password {
             updated_at,
             deleted_at,
             expired_at,
+            strength,
         } = Password::from(password);
 
         let new_password = passwords::ActiveModel {
@@ -41,6 +42,7 @@ impl Password {
             updated_at: ActiveValue::Set(updated_at),
             deleted_at: ActiveValue::Set(deleted_at),
             expired_at: ActiveValue::Set(expired_at),
+            strength: ActiveValue::Set(strength),
         };
 
         let password = passwords::Entity::insert(new_password).exec(db).await?;
