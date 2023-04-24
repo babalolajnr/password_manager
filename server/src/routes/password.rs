@@ -1,5 +1,5 @@
 use actix_web::{
-    post,
+    get, post,
     web::{self, Data, Json},
     HttpResponse,
 };
@@ -33,6 +33,15 @@ async fn create_password(
     Ok(HttpResponse::Ok().json(json!({ "data": result })))
 }
 
+#[get("/")]
+async fn passwords(data: Data<AppState>, user: User) -> Result<HttpResponse, ApiError> {
+    let conn = &data.conn;
+
+    let passwords = Password::passwords(conn, &user.id).await?;
+    Ok(HttpResponse::Ok().json(json!({ "data": passwords })))
+}
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(create_password);
+    cfg.service(passwords);
 }

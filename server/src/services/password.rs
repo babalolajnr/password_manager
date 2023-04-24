@@ -1,4 +1,5 @@
-use sea_orm::{ActiveValue, DbConn, EntityTrait};
+use sea_orm::{ActiveValue, ColumnTrait, DbConn, EntityTrait, QueryFilter};
+use uuid::Uuid;
 
 use crate::{
     api_error::ApiError,
@@ -52,5 +53,14 @@ impl Password {
             .await?;
 
         Ok(password.first().cloned())
+    }
+
+    pub async fn passwords(db: &DbConn, user_id: &Uuid) -> Result<Vec<Password>, ApiError> {
+        let passwords = passwords::Entity::find()
+            .filter(passwords::Column::UserId.eq(*user_id))
+            .all(db)
+            .await?;
+
+        Ok(passwords)
     }
 }
