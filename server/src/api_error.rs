@@ -1,6 +1,7 @@
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use log::error;
 use migration::DbErr;
+use sea_orm::TransactionError;
 use serde::Deserialize;
 use serde_json::json;
 use std::fmt;
@@ -46,6 +47,13 @@ impl ApiError {
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.message.to_string())
+    }
+}
+
+impl<T: std::error::Error> std::convert::From<TransactionError<T>> for ApiError {
+    fn from(value: TransactionError<T>) -> Self {
+        error!("Transaction error: {}", value.to_string());
+        ApiError::internal_server_error()
     }
 }
 
