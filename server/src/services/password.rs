@@ -1,4 +1,6 @@
-use sea_orm::{ActiveValue, ColumnTrait, DbConn, EntityTrait, QueryFilter};
+use sea_orm::{
+    ActiveValue, ColumnTrait, DbConn, EntityTrait, IntoActiveModel, QueryFilter, TransactionTrait,
+};
 use uuid::Uuid;
 
 use crate::{
@@ -12,47 +14,16 @@ impl Password {
         password: CreatePasswordDTO,
         db: &DbConn,
     ) -> Result<Option<Password>, ApiError> {
-        let Password {
-            id,
-            user_id,
-            website,
-            username,
-            password,
-            note,
-            tags,
-            url,
-            security_question,
-            created_at,
-            updated_at,
-            deleted_at,
-            expired_at,
-            strength,
-        } = Password::from(password);
+        let new_password = Password::from(password).into_active_model();
 
-        let new_password = passwords::ActiveModel {
-            id: ActiveValue::set(id),
-            user_id: ActiveValue::set(user_id),
-            website: ActiveValue::Set(website),
-            username: ActiveValue::Set(username),
-            password: ActiveValue::Set(password),
-            note: ActiveValue::Set(note),
-            tags: ActiveValue::Set(tags),
-            url: ActiveValue::Set(url),
-            security_question: ActiveValue::Set(security_question),
-            created_at: ActiveValue::Set(created_at),
-            updated_at: ActiveValue::Set(updated_at),
-            deleted_at: ActiveValue::Set(deleted_at),
-            expired_at: ActiveValue::Set(expired_at),
-            strength: ActiveValue::Set(strength),
-        };
+        let insert_result = passwords::Entity::insert(new_password).exec(db).await?;
 
-        let password = passwords::Entity::insert(new_password).exec(db).await?;
+        let password = passwords::Entity::find_by_id(insert_result.last_insert_id)
+            .one(db)
+            .await?
+            .map(|p| p.into());
 
-        let password = passwords::Entity::find_by_id(password.last_insert_id)
-            .all(db)
-            .await?;
-
-        Ok(password.first().cloned())
+        Ok(password)
     }
 
     pub async fn passwords(db: &DbConn, user_id: &Uuid) -> Result<Vec<Password>, ApiError> {
