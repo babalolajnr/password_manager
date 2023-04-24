@@ -1,11 +1,14 @@
 {
     "cSpell.words": [
         "chrono",
+        "codegen",
         "dotenvy",
         "Hmac",
         "Iden",
         "listenfd",
-        "systemfd"
+        "middlewares",
+        "systemfd",
+        "zxcvbn"
     ],
     "sqltools.connections": [
         {
