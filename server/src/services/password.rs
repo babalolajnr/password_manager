@@ -1,6 +1,4 @@
-use sea_orm::{
-    ActiveValue, ColumnTrait, DbConn, EntityTrait, IntoActiveModel, QueryFilter, TransactionTrait,
-};
+use sea_orm::{ColumnTrait, DbConn, EntityTrait, IntoActiveModel, QueryFilter};
 use uuid::Uuid;
 
 use crate::{
@@ -10,6 +8,7 @@ use crate::{
 };
 
 impl Password {
+    /// Create a new password
     pub async fn create(
         password: CreatePasswordDTO,
         db: &DbConn,
@@ -26,6 +25,7 @@ impl Password {
         Ok(password)
     }
 
+    /// Get all passwords for a user
     pub async fn passwords(db: &DbConn, user_id: &Uuid) -> Result<Vec<Password>, ApiError> {
         let passwords = passwords::Entity::find()
             .filter(passwords::Column::UserId.eq(*user_id))
