@@ -31,8 +31,13 @@
 
 
 		if (response.ok) {
-			// Navigate to dashboard
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            
+
+            // Navigate to dashboard
             goto('/dashboard')
+            
 		} else {
 			error = true;
 			setTimeout(() => {
