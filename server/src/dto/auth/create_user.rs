@@ -41,7 +41,7 @@ impl From<CreateUserDTO> for User {
             id: Uuid::new_v4(),
             name: user.name.unwrap(),
             email: user.email.unwrap(),
-            password: bcrypt::hash(&user.password.unwrap(), 4).unwrap(),
+            password: bcrypt::hash(user.password.unwrap(), 4).unwrap(),
             created_at: timestamp,
             updated_at: timestamp,
             deleted_at: None,

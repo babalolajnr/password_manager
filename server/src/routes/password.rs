@@ -29,7 +29,7 @@ async fn create_password(
     }
 
     let password = CreatePasswordDTO::new(&dto, &user.id);
-    let result = Password::create(password.into(), conn).await?.unwrap();
+    let result = Password::create(password, conn).await?.unwrap();
     Ok(HttpResponse::Ok().json(json!({ "data": result })))
 }
 

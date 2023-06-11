@@ -9,7 +9,7 @@ pub async fn init() -> Result<DatabaseConnection, DbErr> {
     let database_url = env::var("DATABASE_URL").unwrap();
     let db = Database::connect(&database_url).await?;
 
-    let url = format!("{}", database_url);
+    let url = database_url.to_string();
 
     Database::connect(&url).await?;
     info!("Connected to database");

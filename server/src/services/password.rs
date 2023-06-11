@@ -19,8 +19,7 @@ impl Password {
 
         let password = passwords::Entity::find_by_id(insert_result.last_insert_id)
             .one(db)
-            .await?
-            .map(|p| p.into());
+            .await?;
 
         Ok(password)
     }

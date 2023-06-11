@@ -35,7 +35,7 @@ impl FromRequest for User {
                     Ok(claims) => {
                         let app_state = req.app_data::<Data<AppState>>().unwrap().clone();
 
-                        let uuid = Uuid::parse_str(&claims.get("id").unwrap())
+                        let uuid = Uuid::parse_str(claims.get("id").unwrap())
                             .map_err(|e| {
                                 error!("{}", e);
                                 ApiError::unauthorized()

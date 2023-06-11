@@ -50,6 +50,6 @@ impl Model {
     }
 
     pub fn verify_password(&self, password: &str) -> Result<bool, BcryptError> {
-        Ok(bcrypt::verify(password, &self.password)?)
+        bcrypt::verify(password, &self.password)
     }
 }

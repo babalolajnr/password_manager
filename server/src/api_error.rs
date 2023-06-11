@@ -62,36 +62,36 @@ impl From<DbErr> for ApiError {
         match error {
             DbErr::ConnectionAcquire => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::TryIntoErr {
                 from: _,
                 into: _,
                 source: _,
-            } => ApiError::new(500, serde_json::Value::String(format!("Diesel error: "))),
+            } => ApiError::new(500, serde_json::Value::String("Diesel error: ".to_string())),
             DbErr::Conn(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::Exec(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::Query(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::ConvertFromU64(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::UnpackInsertId => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::UpdateGetPrimaryKey => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::RecordNotFound(_) => ApiError::new(
                 404,
@@ -99,31 +99,31 @@ impl From<DbErr> for ApiError {
             ),
             DbErr::AttrNotSet(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::Custom(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::Type(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::Json(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::Migration(_) => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::RecordNotInserted => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
             DbErr::RecordNotUpdated => ApiError::new(
                 500,
-                serde_json::Value::String(format!("Diesel error: {}", error.to_string())),
+                serde_json::Value::String(format!("Diesel error: {}", error)),
             ),
         }
     }

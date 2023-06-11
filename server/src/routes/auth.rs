@@ -62,7 +62,7 @@ async fn login(dto: Json<LoginDTO>, data: Data<AppState>) -> Result<HttpResponse
 
         let user_id = user.id.to_string();
         let name = user.name.to_string();
-        let email = user.email.to_string();
+        let email = user.email;
 
         let mut claims = BTreeMap::new();
         claims.insert("id", user_id.as_str());
