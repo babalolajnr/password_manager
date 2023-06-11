@@ -1,9 +1,29 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { baseUrl } from '../../../config';
 	let open = false;
 
 	function toggle() {
 		open = !open;
 	}
+
+	async function getPasswords() {
+		const response = await fetch(`${baseUrl}/password/`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			console.log(data);
+		}
+	}
+
+	onMount(async () => {
+		await getPasswords();
+	});
 </script>
 
 <ul>
@@ -39,7 +59,9 @@
 			</div>
 		</div>
 		<div class="flex flex-col border border-black border-opacity-20 rounded-lg">
-			<div class="flex items-center justify-between border-b border-black border-opacity-20 px-4 py-2">
+			<div
+				class="flex items-center justify-between border-b border-black border-opacity-20 px-4 py-2"
+			>
 				<div class="flex gap-2">
 					<!-- Bookmark Icon -->
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -53,9 +75,7 @@
 				</div>
 				<div>
 					<!-- Edit button -->
-					<button class="focus:outline-none border py-1 px-5 rounded-lg text-sm">
-						Edit
-					</button>
+					<button class="focus:outline-none border py-1 px-5 rounded-lg text-sm"> Edit </button>
 				</div>
 			</div>
 			<div class="px-4">
